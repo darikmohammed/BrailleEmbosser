@@ -1,16 +1,17 @@
 const express = require('express'); 
 const bodyParser = require('body-parser'); 
+const cors = require ('cors');
+
 
 const app = express(); 
-
+//middlewere
 app.use(express.json());
+app.use(cors()); 
 
-var recived_printing_data ; 
+app.post('/text' ,(req,res)=>{
+    console.log(req.body); 
+})
 
-function convertingPrintingData(){
-    return arr_recieved_data = recived_printing_data.split(''); 
-   
-}
 
 
 const port = process.env.PORT||3000;
