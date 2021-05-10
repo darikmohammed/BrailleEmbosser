@@ -1,0 +1,11 @@
+
+<main class="container">
+  <form [formGroup]= "form">
+    <div>
+     <textarea formControlName="statement" ></textarea>
+    </div>
+   </form>
+   <div>
+     <button (click)="send(form)">Send</button>
+   </div>
+</main>
