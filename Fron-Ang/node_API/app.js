@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser'); 
 const cors = require ('cors');
 const multer = require('multer'); 
+const request = require('request'); 
 var extract = require('textract'); 
 
 
@@ -31,6 +32,28 @@ var upload = multer({ storage : storage}).single('userPhoto');
 app.post('/text' ,(req,res)=>{
     console.log(req.body); 
 })
+
+app.post('/audio', (req,res)=>{
+    let uri = {
+        "audio" : {
+        "content": req.output 
+        }
+    }
+    let config = {
+        "enableAutomaticPunctuation": true,
+        "encoding": "LINEAR16",
+        "languageCode": req.language,
+        "model": "default"
+    }
+    const requestBody = {
+        audio : audio , 
+        config : config
+    }
+    request.post('https://speech.googleapis.com/v1p1beta1/speech:recognize', requestBody, (err, res, body) => {
+        if (err) { return console.log(err); }
+        console.log(res);
+    });
+}); 
 
 app.get('/uploadDocument' , (req,res)=>{
     res.sendFile(__dirname + "/fileUpload.html");

@@ -1,11 +1,13 @@
 class convertTOBitsArray{
     constructor(printingData){
-        this.printingData = printingData; 
+        this.printingData = printingData;
+
     }
 
     convertingPrintingData(){
         return printingData.split('');    
     }
+
     EnglishAlphabetConvertor(alphabet){
         switch (alphabet){
             case 'a' : 
@@ -86,12 +88,29 @@ class convertTOBitsArray{
             case 'z' : 
                 value = [1,0,1,0,1,1]; 
                 break;
+            case 'ä' : 
+                value = [0,1,0,0,0,1]; 
             default : 
                 value = null; 
                 break; 
         }
         return value; 
     }
+
+    AmharicAlphabetConvertor(alphabet){
+        switch (alphabet){
+            case 'ሀ' : // hä
+                value1 = EnglishAlphabetConvertor(h);
+                value2 = EnglishAlphabetConvertor(ä);
+                break; 
+            
+            default : 
+                value1= value2 = null; 
+                break; 
+        }
+        return [...value1, ...value2 ] ; 
+    }
+
     CharacterConvertor(alphabet){
         switch (alphabet){
             case '.' : 
@@ -148,6 +167,7 @@ class convertTOBitsArray{
         }
         return value; 
     }
+
     NumberConvertor(alphabet){
         switch (alphabet){
         case '1' : 
@@ -186,4 +206,5 @@ class convertTOBitsArray{
         }
         return value; 
     }
+
 }
