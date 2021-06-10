@@ -10,9 +10,38 @@ var extract = require('textract');
 
 let uploadedFileName; 
 var filePath; 
+var audioUpload = multer({dest : 'uploads/'})
 
 
 const app = express(); 
+const speech = require('@google-cloud/speech');
+const client = new speech.SpeechClient();
+
+async function quickstart(blob , language) {
+    
+  
+    // The audio file's encoding, sample rate in hertz, and BCP-47 language code
+    const audio = {
+          content: blob
+    };
+    const config = {
+      encoding: 'LINEAR16',
+      sampleRateHertz: 16000,
+      languageCode: language, //am-ET for amharic translation
+    };
+    const request = {
+      audio: audio,
+      config: config,
+    };
+  
+    // Detects speech in the audio file
+    const [response] = await client.recognize(request);
+    const transcription = response.results
+      .map(result => result.alternatives[0].transcript)
+      .join('\n');
+    console.log(`Transcription: ${transcription}`);
+  }
+
 //middlewere
 app.use(express.json());
 app.use(cors()); 
@@ -29,35 +58,54 @@ var storage =   multer.diskStorage({
 
 var upload = multer({ storage : storage}).single('userPhoto');
 
+app.get('/uploadDocument' , (req,res)=>{
+    res.sendFile(__dirname + "/fileUpload.html");
+})
+
+app.get('/audioRecord' , (req,res)=>{
+    res.sendFile(__dirname +"/audioRecord.html");
+})
+
 app.post('/text' ,(req,res)=>{
     console.log(req.body); 
 })
 
-app.post('/audio', (req,res)=>{
-    let uri = {
-        "audio" : {
-        "content": req.output 
-        }
-    }
-    let config = {
-        "enableAutomaticPunctuation": true,
-        "encoding": "LINEAR16",
-        "languageCode": req.language,
-        "model": "default"
-    }
-    const requestBody = {
-        audio : audio , 
-        config : config
-    }
-    request.post('https://speech.googleapis.com/v1p1beta1/speech:recognize', requestBody, (err, res, body) => {
-        if (err) { return console.log(err); }
-        console.log(res);
-    });
+app.post('/audio', audioUpload.single('audio_data') , (req,res,next)=>{
+    // get the language form the post request parameter
+
+    const blobToBase64 = blob => {
+        const reader = new FileReader();
+        reader.readAsDataURL(req.file);
+        return new Promise(resolve => {
+          reader.onloadend = () => {
+            resolve(reader.result);
+          };
+        });
+      };
+      quickstart(blobToBase64 , 'en-US');
+    // let uri = {
+    //     "audio" : {
+    //     "content": req.output 
+    //     }
+    // }
+    // let config = {
+    //     "enableAutomaticPunctuation": true,
+    //     "encoding": "LINEAR16",
+    //     "languageCode": req.language,
+    //     "model": "default"
+    // }
+    // const requestBody = {
+    //     audio : audio , 
+    //     config : config
+    // }
+    // request.post('https://speech.googleapis.com/v1p1beta1/speech:recognize', requestBody, (err, res, body) => {
+    //     if (err) { return console.log(err); }
+    //     console.log(res);
+    // });
 }); 
 
-app.get('/uploadDocument' , (req,res)=>{
-    res.sendFile(__dirname + "/fileUpload.html");
-})
+
+
 app.post('/api/uploadDocument',function(req,res){
     upload(req,res,function(err) {
         if(err) {
